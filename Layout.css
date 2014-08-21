@@ -1,0 +1,235 @@
+body
+{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.noselect
+{
+    -webkit-touch-callout: none;
+      -webkit-user-select: none;
+       -khtml-user-select: none;
+	     -moz-user-select: none;
+	      -ms-user-select: none;
+	          user-select: none;
+}
+
+#loader
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #eee;
+    background-image: url(img/icon_256x256.png);
+    background-position: 50% 40%;
+    background-repeat: no-repeat no-repeat;
+}
+
+#message
+{
+    position: absolute;
+    font-family: monospace;
+    text-align: center;
+    line-height: 25px;
+    top: 40%;
+    width: 100%;
+    padding-top: 160px;
+}
+
+#progress
+{
+    position: relative;
+    font-family: monospace;
+    text-align: center;
+    line-height: 25px;
+    top: 40%;
+    width: 100px;
+    height: 2px;
+    padding-top: 200px;
+    margin: 0 auto;
+}
+
+#progress .background
+{
+    position: absolute;
+    width: 100%;
+    height: inherit;
+    background: #aaa;
+}
+
+#progress .bar
+{
+    position: absolute;
+    height: inherit;
+    background: #07f;
+    
+    -webkit-box-shadow: 0px 0px 10px #07f;
+       -moz-box-shadow: 0px 0px 10px #07f;
+            box-shadow: 0px 0px 10px #07f;
+}
+
+#file-list
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #eee;
+    overflow: hidden;
+}
+
+#file-list-head
+{
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    padding-left: 8px;
+    border-bottom: 1px solid #333;
+    color: #333;
+    font-size: 16px;
+    font-family: monospace;
+    line-height: 40px;
+}
+
+#file-list-body
+{
+    position: absolute;
+    top: 41px;
+    bottom: 0;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#file-list-body li
+{
+    height: 30px;
+    display: block;
+    padding-left: 28px;
+    line-height: 30px;
+    font-family: monospace;
+    color: #333;
+    background-image: url(img/icon_16x16.png);
+    background-position: 8px center;
+    background-repeat: no-repeat no-repeat;
+    cursor: pointer;
+}
+
+#file-list-body li:hover
+{
+    font-weight: bold;
+    background-color: #fff;
+}
+
+#container
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#popup
+{
+    z-index: 1;
+    position: absolute;
+    top: -125px;
+    left: -200px;
+    right: -200px;
+    padding: 15px;
+    background: #eee;
+    color: #333;
+    font-family: monospace;
+
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+}
+
+#embed-code
+{
+    position: relative;
+    width: 364px;
+    padding: 2px;
+    background: #ccc;
+    color: #333;
+    border: 1px solid black;
+    font-weight: bold;
+    font-family: monospace;
+
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+            border-radius: 3px;
+}
+
+#close
+{
+    position: relative;
+    float: right;
+    margin-top: 10px;
+    padding: 4px;
+    width: 80px;
+    background: #333;
+    color: #ccc;
+    text-align: center;
+    cursor: pointer;
+
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+            border-radius: 3px;
+}
+
+#close:hover
+{
+    background: #000;
+}
+
+.center-point
+{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    right: 50%;
+    bottom: 50%;
+}
+
+.close-button
+{
+    overflow: hidden;
+}
+
+.selector
+{
+    min-width: 123px;
+}
+
+#brand
+{
+	z-index: 1;
+	position: fixed;
+	
+	bottom: 0;
+	right: 0;
+	width: 200px;
+	height: 30px;
+	
+	background: #111;
+	border-radius: 10px 0 0 0;
+	
+	color: #eee;
+	cursor: pointer;
+	font-weight: bold;
+	font-family: 'Open Sans', sans-serif;
+	text-align: center;
+	line-height: 30px;
+	
+	transition: background 0.1s ease-in;
+}
+
+#brand:hover
+{
+	background: #f50;
+}

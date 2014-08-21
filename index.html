@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='UTF-8'/>
+        <title>Drive3D</title>
+        <link rel='icon' href='img/icon.png'/>
+        <meta http-equiv='Content-type' content='text/html; charset=UTF-8'/>
+        <meta name='description' content='Drive3D is an Google Drive application for displaying 3D files.'/>
+        <meta name='keywords' content='3D,View,OBJ,Google,Drive'/>
+		<meta name="author" content="Herman Bergwerf">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<meta property="og:title" content="Drive3D" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://drive3d.hermanbergwerf.com" />
+		<meta property="og:image" content="http://drive3d.hermanbergwerf.com/img/og-image.jpg" />
+		<meta property="og:site_name" content="Drive3D" />
+		<meta property="og:description" content="Drive3D is an Google Drive application for displaying 3D files." />
+        
+        <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" />
+		<link type="text/css" rel="stylesheet" href="http://hermanbergwerf.com/css/classes.css" />
+        <link type="text/css" rel="stylesheet" href='Layout.css' />
+        
+        <script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
+        <script type='text/javascript' src='lib/three.min.js'></script>
+        <script type='text/javascript' src='lib/dat.gui.min.js'></script>
+        <script type='text/javascript' src='lib/TrackballControls.js'></script>
+        <script type='text/javascript' src='lib/Detector.js'></script>
+        <script type='text/javascript' src='lib/stats.min.js'></script>
+        <script type='text/javascript' src='Utility.js'></script>
+        <script type='text/javascript' src='MTLLoader.js'></script>
+        <script type='text/javascript' src='OBJMTLLoader.js'></script>
+        <script type='text/javascript' src='Drive.js'></script>
+        <script type='text/javascript' src='Loader.js'></script>
+        <script type='text/javascript'>
+            var LOCATION = 'http://drive3d.hermanbergwerf.com/index.html';
+            var CLIENT_ID = '54923442107.apps.googleusercontent.com';
+            var SCOPES = 'https://www.googleapis.com/auth/drive.install https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly';
+            var SETTINGS = {
+                embedded: false,
+                stats: true,
+                gui: true,
+                objurl: null,
+                mtlurl: null
+            };
+
+            if(getParameterByName('embed') != '')
+            {
+                SETTINGS.embedded = true;
+                var params = $.parseJSON(getParameterByName('embed'));
+                SETTINGS.stats = params.stats || false;
+                SETTINGS.gui = params.gui || false;
+                SETTINGS.objurl = params.objurl || '';
+                SETTINGS.mtlurl = params.mtlurl || '';
+            };
+
+            function handleClientLoad()
+            {
+                if(!SETTINGS.embedded) window.setTimeout(checkAuth, 1);
+            };
+
+            function checkAuth()
+            {
+                gapi.auth.authorize({
+                    'client_id': CLIENT_ID,
+                    'scope': SCOPES,
+                    'immediate': true },
+                    handleAuthResult);
+            };
+
+            function setProgressBar(e)
+            {
+                $('#progress').show();
+                $('#progress .bar').css("width", e.loaded / e.total * 100 + "%");
+            }
+
+            function handleAuthResult(authResult)
+            {
+                if(authResult && !authResult.error)//acces token
+                {
+                    if(!Detector.webgl) return;//no WebGL support
+                    gapi.client.load('drive', 'v2', function()//wait until client is loaded
+                    {
+                        var state = getParameterByName('state');
+                        if(state != '')
+                        {
+                            var query = $.parseJSON(state);
+                            if(query.action = 'open')//user opened file from Google Drive
+                            {
+                                $(document.body).css('cursor', 'progress');
+                                $('#message').html('Retrieving file...');
+                                window.setTimeout(function()
+                                {
+                                    getDriveFile(query.ids[0], function(file)//get metadata of file
+                                    {
+                                        if(getFileExtension(file.title) == 'OBJ')
+                                        {
+                                            OBJ_TITLE = file.title;
+                                            OBJMTL_FOLDER = file.parents[0].id || '';
+                                            window.document.title = file.title + " (loading)";
+                                            readDriveFile(file, function(OBJFile)//download file content
+                                            {
+                                                $('#message').html('Loading Model...');
+                                                window.setTimeout(function(){ init(OBJFile) }, 100);
+                                            }, setProgressBar);
+                                        }
+                                        else
+                                        {
+                                            $('#message').html('Only OBJ files can be loaded.<br>Associated files like MTL files will be automaticaly retrieved!');
+                                            $(document.body).css('cursor', 'auto');
+                                        }
+                                    });
+                                }, 100);
+                            }
+                            else listOBJFiles();
+                        }
+                        else listOBJFiles();
+                    });
+                }
+                else//no access
+                {
+                    //ask for access
+                    gapi.auth.authorize({
+                        'client_id': CLIENT_ID,
+                        'scope': SCOPES,
+                        'immediate': false },
+                        handleAuthResult);
+                }
+            };
+
+            function listOBJFiles()
+            {
+                $('#logo').hide();
+                $('#file-list').show();
+                var request = gapi.client.drive.files.list({
+                    'maxResults': 1000,
+                    'q': "mimeType = 'application/octet-stream'"
+                });
+                request.execute(function(result)
+                {
+                    if(result.items)
+                    {
+                        for(var num = 0; num < result.items.length; num++)
+                        {
+                            getDriveFile(result.items[num].id, function(file)
+                            {
+                                if(getFileExtension(file.title) == 'OBJ')
+                                    $('#file-list-body').append("<li class='noselect'>" + file.title + '</li>');
+                            });
+                        }
+                    }
+                });
+                $('#file-list-body').click('li', function(e)
+                {
+                    var title = e.target.innerHTML;
+                    $('#file-list').hide();
+                    $('#logo').show();
+                    $(document.body).css('cursor', 'progress');
+                    $('#message').html('Retrieving file...');
+                    window.setTimeout(function()
+                    {
+                        findDriveFile(title, function(file)
+                        {
+                            OBJ_TITLE = file.title;
+                            OBJMTL_FOLDER = file.parents[0].id || '';
+                            window.document.title = file.title + " (loading)";
+                            readDriveFile(file, function(OBJFile)//download file content
+                            {
+                                $('#message').html('Loading Model...');
+                                window.setTimeout(function(){ init(OBJFile) }, 100);
+                            }, setProgressBar);
+                        }, function()
+                        {
+                            alert(title + " doesn't exist anymore.");
+                            $(e.target).remove();
+                            $(document.body).css('cursor', 'auto');
+                            $('#message').html('');
+                            $('#logo').hide();
+                            $('#file-list').show();
+                        });
+                    }, 100);
+                });
+            };
+        </script>
+        <script type='text/javascript' src='https://apis.google.com/js/client.js?onload=handleClientLoad'></script>
+    </head>
+    <body>
+        <div id='loader'>
+            <div id='message'></div>
+            <div id='progress' style='display: none;'>
+                <div class='background'></div>
+                <div class='bar' style='width: 0%;'></div>
+            </div>
+        </div>
+        <div id='file-list' style='display: none;'>
+            <div id='file-list-head'>All OBJ files in your Google Drive</div>
+            <div id='file-list-body' class='noselect'></div>
+        </div>
+        <div id='container' style='display: none;'></div>
+		<div class='center-point'>
+			<div id='popup' style='display: none;'>
+				<span>In order to embed a 3D model into your webpage, you have to put all 3D files inside a public Google Drive folder without subdirectories.</li>
+				<br><br>
+				<span style='font-weight: bold;'>Embed code:</span>
+				<input id='embed-code' type='text' onfocus='this.select()' onmouseup='return false' spellcheck='false' readonly/>
+				<div id='close'>Close</div>
+			</div>
+		</div>
+		<div id="brand">
+			<a class="clear" target="_blank" rel="author" href="http://hermanbergwerf.com" title="Visit my website">&copy; Herman Bergwerf</a>
+		</div>
+        <script type='text/javascript'>
+    		var container, stats, gui;
+			var camera, controls, scene, renderer;
+            var group, box, DirectionalLight, SpotLight;
+            var setters = {
+                Reset: function()
+                {
+                    controls.reset();
+                    resetCamera();
+                    render();
+                },
+
+                /* EmbedCode structure ($property)
+                <iframe
+                    src='http://drive3d.hermanbergwerf.com?embed=
+                        {"stats": $stats, "gui": $gui, "objurl": $OBJ_URL, "mtlurl": $MTL_URL}'
+                    style='width: $width; height: $height; overflow: hidden; border: none;'
+                </iframe> */
+
+                Embed: {
+                    Width: '500px',
+                    Height: '300px',
+                    Stats: false,
+                    Controls: false,
+                    GetCode: function()
+                    {
+                        var query = {};
+                        query.stats = setters.Embed.Stats;
+                        query.gui = setters.Embed.Controls;
+                        query.objurl = 'https://googledrive.com/host/' + OBJMTL_FOLDER + '/' + OBJ_TITLE;
+                        query.mtlurl = 'https://googledrive.com/host/' + OBJMTL_FOLDER + '/' + MTL_TITLE;
+                        var EmbedCode =
+                        "<iframe src='http://drive3d.hermanbergwerf.com?embed=" + JSON.stringify(query) +  "'" +
+                            "style='width: " + setters.Embed.Width + "; height: " + setters.Embed.Height + "; overflow: hidden; border: none;'>" +
+                        "</iframe>";
+                        $('#popup').show();
+                        $('#embed-code').val(EmbedCode);
+                    }
+                },
+                Light: '#ffffff',
+                Intensity: 1,
+                Background: '#222222',
+            };
+
+            $('#close').click(function()
+            {
+                $('#popup').hide();
+            });
+
+            if(!Detector.webgl) $('#message').html(Detector.getWebGLErrorMessage().innerHTML);
+
+            if(SETTINGS.embedded)
+            {
+                if(Detector.webgl)//WebGL support
+                {
+                    $('#message').html('Retrieving file...');
+                    $(document.body).css('cursor', 'progress');
+
+                    window.setTimeout(function()
+                    {                
+                        $.get(SETTINGS.objurl, function(OBJFile)
+                        {
+                            $.get(SETTINGS.mtlurl, function(MTLFile)
+                            {
+                                $('#message').html('Loading Model...');
+                                window.setTimeout(function(){ init(OBJFile, MTLFile) }, 100);
+                            });
+                        });
+                    }, 100);
+                }
+            };
+
+            function resetCamera()
+            {
+                controls.target.x = box.cx;
+                controls.target.y = box.cy;
+                controls.target.z = box.cz;
+                camera.position.x = box.cx;
+                camera.position.y = box.cy + box.size * 0.5;
+                camera.position.z = box.cz + box.size * 1.5;
+            };
+
+			function init(OBJFile, MTLFile)
+			{                
+                container = document.getElementById('container');
+
+                //setup
+				camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 10000);
+				controls = new THREE.TrackballControls(camera, container);
+				controls.addEventListener('change', render);
+				scene = new THREE.Scene();
+
+				//load model     
+				loadModel(OBJFile, MTLFile, function(model)
+                {
+                    group = model.group;
+                    box = model.box;
+                    resetCamera();
+                    scene.add(group);
+
+                    //lights
+                    DirectionalLight = new THREE.DirectionalLight(setters.Light, 0);
+                    scene.add(DirectionalLight);
+
+                    SpotLight = new THREE.SpotLight(setters.Light, setters.Intensity);
+                    scene.add(SpotLight);
+
+                    //renderer
+                    renderer = new THREE.WebGLRenderer({ antialias: true });
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    renderer.setClearColor(setters.Background, 1);
+                    container.appendChild(renderer.domElement);
+                	window.addEventListener('resize', onWindowResize, false);
+
+                    //stats
+                    if(SETTINGS.stats)
+                    {
+                        stats = new Stats();
+                        stats.setMode(1); // 0: fps, 1: ms
+                        stats.domElement.style.position = 'fixed';
+                        stats.domElement.style.top = '0px';
+                        stats.domElement.style.left = '0px';
+                        $(stats.domElement).addClass('noselect');
+                        container.appendChild(stats.domElement);
+                    }
+
+                    //gui
+                    if(SETTINGS.gui)
+                    {
+                        gui = new dat.GUI();
+                        $(gui.domElement).addClass('noselect');
+                        gui.add(setters, 'Reset');
+                        var embed = gui.addFolder('Embed');
+                            embed.add(setters.Embed, 'Width');
+                            embed.add(setters.Embed, 'Height');
+                            embed.add(setters.Embed, 'Stats');
+                            embed.add(setters.Embed, 'Controls');
+                            embed.add(setters.Embed, 'GetCode');
+                        gui.addColor(setters, 'Light').onChange(function(value)
+                        {
+                            var color = new THREE.Color(value);
+                            SpotLight.color = color;
+                            render();
+                        });
+                        gui.add(setters, 'Intensity', 0, 1).onChange(function(intensity)
+                        {
+                            SpotLight.intensity = intensity;
+                            render();
+                        });
+                        gui.addColor(setters, 'Background').onChange(function(value)
+                        {
+                            renderer.setClearColor(value, 1);
+                            $(document.body).css('background', value);
+                            render();
+                        });
+                    }
+
+                    animate();
+                    render();
+
+                    $(document.body).css('background', setters.Background);
+                    $(document.body).css('cursor', 'auto');
+                    $('#container').show();
+                    $('#logo').hide();
+
+                    //remove (loading) in title
+                    window.document.title = window.document.title.substr(0, window.document.title.length - 10);
+                });
+			};
+
+			function onWindowResize()
+			{
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				render();
+			};
+
+			function animate()
+			{
+				requestAnimationFrame(animate);
+				controls.update();
+			};
+
+			function render()
+			{
+                SpotLight.position.set(camera.position.x, camera.position.y, camera.position.z);
+                SpotLight.target.position.set(controls.target.x, controls.target.y, controls.target.z);
+				renderer.render(scene, camera);
+			    if(SETTINGS.stats) stats.update();
+			};
+        </script>
+    </body>
+</html>
