@@ -20,8 +20,11 @@ function findDriveFile(fileTitle, callback, notfoundcb)//find file on Google Dri
     });
     request.execute(function(result)
     {
-        if(!result.items) notfoundcb();
-        else if(result.items[0].id) getDriveFile(result.items[0].id, callback);
+        if(result.items && result.items.length > 0)
+        {
+             getDriveFile(result.items[0].id, callback);
+        }
+        else notfoundcb();
     });
 };
 
