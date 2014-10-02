@@ -9,18 +9,18 @@
         <meta name='keywords' content='3D,View,OBJ,Google,Drive'/>
 		<meta name="author" content="Herman Bergwerf">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		
+
 		<meta property="og:title" content="Drive3D" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://drive3d.hermanbergwerf.com" />
-		<meta property="og:image" content="http://drive3d.hermanbergwerf.com/img/og-image.jpg" />
+		<meta property="og:url" content="https://drive3d.hermanbergwerf.com" />
+		<meta property="og:image" content="https://drive3d.hermanbergwerf.com/img/og-image.jpg" />
 		<meta property="og:site_name" content="Drive3D" />
 		<meta property="og:description" content="Drive3D is an Google Drive application for displaying 3D files." />
-        
-        <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" />
-		<link type="text/css" rel="stylesheet" href="http://hermanbergwerf.com/css/classes.css" />
+
+        <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" />
+		<link type="text/css" rel="stylesheet" href="https://hermanbergwerf.com/css/classes.css" />
         <link type="text/css" rel="stylesheet" href='Layout.css' />
-        
+
         <script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
         <script type='text/javascript' src='lib/three.min.js'></script>
         <script type='text/javascript' src='lib/dat.gui.min.js'></script>
@@ -33,7 +33,7 @@
         <script type='text/javascript' src='Drive.js'></script>
         <script type='text/javascript' src='Loader.js'></script>
         <script type='text/javascript'>
-            var LOCATION = 'http://drive3d.hermanbergwerf.com/index.html';
+            var LOCATION = 'https://drive3d.hermanbergwerf.com/index.html';
             var CLIENT_ID = '54923442107.apps.googleusercontent.com';
             var SCOPES = 'https://www.googleapis.com/auth/drive.install https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly';
             var SETTINGS = {
@@ -207,7 +207,7 @@
 			</div>
 		</div>
 		<div id="brand">
-			<a class="clear" target="_blank" rel="author" href="http://hermanbergwerf.com" title="Visit my website">&copy; Herman Bergwerf</a>
+			<a class="clear" target="_blank" rel="author" href="https://hermanbergwerf.com" title="Visit my website">&copy; Herman Bergwerf</a>
 		</div>
         <script type='text/javascript'>
     		var container, stats, gui;
@@ -223,7 +223,7 @@
 
                 /* EmbedCode structure ($property)
                 <iframe
-                    src='http://drive3d.hermanbergwerf.com?embed=
+                    src='https://drive3d.hermanbergwerf.com?embed=
                         {"stats": $stats, "gui": $gui, "objurl": $OBJ_URL, "mtlurl": $MTL_URL}'
                     style='width: $width; height: $height; overflow: hidden; border: none;'
                 </iframe> */
@@ -241,7 +241,7 @@
                         query.objurl = 'https://googledrive.com/host/' + OBJMTL_FOLDER + '/' + OBJ_TITLE;
                         query.mtlurl = 'https://googledrive.com/host/' + OBJMTL_FOLDER + '/' + MTL_TITLE;
                         var EmbedCode =
-                        "<iframe src='http://drive3d.hermanbergwerf.com?embed=" + JSON.stringify(query) +  "'" +
+                        "<iframe src='https://drive3d.hermanbergwerf.com?embed=" + JSON.stringify(query) +  "'" +
                             "style='width: " + setters.Embed.Width + "; height: " + setters.Embed.Height + "; overflow: hidden; border: none;'>" +
                         "</iframe>";
                         $('#popup').show();
@@ -268,7 +268,7 @@
                     $(document.body).css('cursor', 'progress');
 
                     window.setTimeout(function()
-                    {                
+                    {
                         $.get(SETTINGS.objurl, function(OBJFile)
                         {
                             $.get(SETTINGS.mtlurl, function(MTLFile)
@@ -292,7 +292,7 @@
             };
 
 			function init(OBJFile, MTLFile)
-			{                
+			{
                 container = document.getElementById('container');
 
                 //setup
@@ -301,7 +301,7 @@
 				controls.addEventListener('change', render);
 				scene = new THREE.Scene();
 
-				//load model     
+				//load model
 				loadModel(OBJFile, MTLFile, function(model)
                 {
                     group = model.group;
