@@ -7,18 +7,18 @@
         <meta http-equiv='Content-type' content='text/html; charset=UTF-8'/>
         <meta name='description' content='Drive3D is an Google Drive application for displaying 3D files.'/>
         <meta name='keywords' content='3D,View,OBJ,Google,Drive'/>
-		<meta name="author" content="Herman Bergwerf">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Herman Bergwerf">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<meta property="og:title" content="Drive3D" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://drive3d.hermanbergwerf.com" />
-		<meta property="og:image" content="https://drive3d.hermanbergwerf.com/img/og-image.jpg" />
-		<meta property="og:site_name" content="Drive3D" />
-		<meta property="og:description" content="Drive3D is an Google Drive application for displaying 3D files." />
+        <meta property="og:title" content="Drive3D" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://drive3d.hermanbergwerf.com" />
+        <meta property="og:image" content="https://drive3d.hermanbergwerf.com/img/og-image.jpg" />
+        <meta property="og:site_name" content="Drive3D" />
+        <meta property="og:description" content="Drive3D is an Google Drive application for displaying 3D files." />
 
         <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" />
-		<link type="text/css" rel="stylesheet" href="https://hermanbergwerf.com/css/classes.css" />
+        <link type="text/css" rel="stylesheet" href="https://hermanbergwerf.com/css/classes.css" />
         <link type="text/css" rel="stylesheet" href='Layout.css' />
 
         <script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
@@ -134,7 +134,7 @@
                 $('#file-list').show();
                 var request = gapi.client.drive.files.list({
                     'maxResults': 1000,
-                    'q': "mimeType = 'application/octet-stream'"
+                    'q': "trashed = false and mimeType = 'application/octet-stream' and fullText contains '.obj'"
                 });
                 request.execute(function(result)
                 {
@@ -197,21 +197,21 @@
             <div id='file-list-body' class='noselect'></div>
         </div>
         <div id='container' style='display: none;'></div>
-		<div class='center-point'>
-			<div id='popup' style='display: none;'>
-				<span>In order to embed a 3D model into your webpage, you have to put all 3D files inside a public Google Drive folder without subdirectories.</li>
-				<br><br>
-				<span style='font-weight: bold;'>Embed code:</span>
-				<input id='embed-code' type='text' onfocus='this.select()' onmouseup='return false' spellcheck='false' readonly/>
-				<div id='close'>Close</div>
-			</div>
-		</div>
-		<div id="brand">
-			<a class="clear" target="_blank" rel="author" href="https://hermanbergwerf.com" title="Visit my website">&copy; Herman Bergwerf</a>
-		</div>
+            <div class='center-point'>
+                <div id='popup' style='display: none;'>
+                    <span>In order to embed a 3D model into your webpage, you have to put all 3D files inside a public Google Drive folder without subdirectories.</li>
+                <br><br>
+                <span style='font-weight: bold;'>Embed code:</span>
+                <input id='embed-code' type='text' onfocus='this.select()' onmouseup='return false' spellcheck='false' readonly/>
+                <div id='close'>Close</div>
+            </div>
+        </div>
+        <div id="brand" style="color: #eee !important; text-decoration: none !important;">
+            <a class="clear" target="_blank" rel="author" href="https://hermanbergwerf.com" title="Visit my website">&copy; Herman Bergwerf</a>
+        </div>
         <script type='text/javascript'>
-    		var container, stats, gui;
-			var camera, controls, scene, renderer;
+            var container, stats, gui;
+            var camera, controls, scene, renderer;
             var group, box, DirectionalLight, SpotLight;
             var setters = {
                 Reset: function()
@@ -291,18 +291,18 @@
                 camera.position.z = box.cz + box.size * 1.5;
             };
 
-			function init(OBJFile, MTLFile)
-			{
+            function init(OBJFile, MTLFile)
+            {
                 container = document.getElementById('container');
 
                 //setup
-				camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 10000);
-				controls = new THREE.TrackballControls(camera, container);
-				controls.addEventListener('change', render);
-				scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 10000);
+                controls = new THREE.TrackballControls(camera, container);
+                controls.addEventListener('change', render);
+                scene = new THREE.Scene();
 
-				//load model
-				loadModel(OBJFile, MTLFile, function(model)
+                //load model
+                loadModel(OBJFile, MTLFile, function(model)
                 {
                     group = model.group;
                     box = model.box;
@@ -321,7 +321,7 @@
                     renderer.setSize(window.innerWidth, window.innerHeight);
                     renderer.setClearColor(setters.Background, 1);
                     container.appendChild(renderer.domElement);
-                	window.addEventListener('resize', onWindowResize, false);
+                    window.addEventListener('resize', onWindowResize, false);
 
                     //stats
                     if(SETTINGS.stats)
@@ -377,29 +377,29 @@
                     //remove (loading) in title
                     window.document.title = window.document.title.substr(0, window.document.title.length - 10);
                 });
-			};
+            };
 
-			function onWindowResize()
-			{
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				render();
-			};
+            function onWindowResize()
+            {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                render();
+            };
 
-			function animate()
-			{
-				requestAnimationFrame(animate);
-				controls.update();
-			};
+            function animate()
+            {
+                requestAnimationFrame(animate);
+                controls.update();
+            };
 
-			function render()
-			{
+            function render()
+            {
                 SpotLight.position.set(camera.position.x, camera.position.y, camera.position.z);
                 SpotLight.target.position.set(controls.target.x, controls.target.y, controls.target.z);
-				renderer.render(scene, camera);
-			    if(SETTINGS.stats) stats.update();
-			};
+                renderer.render(scene, camera);
+                if(SETTINGS.stats) stats.update();
+            };
         </script>
     </body>
 </html>
