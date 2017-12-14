@@ -213,7 +213,7 @@ body
 	
 	bottom: 0;
 	right: 0;
-	width: 200px;
+	width: 140px;
 	height: 30px;
 	
 	background: #111;
@@ -225,6 +225,7 @@ body
 	font-family: 'Open Sans', sans-serif;
 	text-align: center;
 	line-height: 30px;
+	text-decoration: underline;
 	
 	transition: background 0.1s ease-in;
 }
